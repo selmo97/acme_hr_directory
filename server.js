@@ -1,4 +1,5 @@
 const express = require('express') //web server
+const morgan = require('morgan');
  const pg = require('pg'); //library to connect to PostgresSQL db
  const { Client } = pg; //specific class you use to make that connection
 
@@ -15,6 +16,7 @@ const express = require('express') //web server
  const app = express()
  const port = 3000
  app.use(express.json()); // so u can read JSON from the body
+ app.use(morgan('dev'));
 
 //connecting to the DB THEN starting the Server using try catch
 const startServer = async () => {
