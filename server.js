@@ -9,7 +9,7 @@ const morgan = require('morgan');
   password: '',
   host: 'localhost',
   port: 5432,
-  database: 'tthe_acme_hr_db',
+  database: 'the_acme_hr_db',
  })
 
  //creating the express App + Port
@@ -41,31 +41,60 @@ app.get('/', (req, res) => {
 GET /api/employees:
 - Returns array of employees
 */
+app.get('/api/employees', async (req,res) => {
+    const result = await client.query('SELECT * FROM employees');
+    res.json(result.rows);
+})
 
 /*
 GET /api/departments: 
 - Returns an array of departments.
 */
+app.get('/api/departments', async (req,res) => {
+    const result = await client.query('SELECT * FROM departments');
+    res.json(result.rows);
+})
 
 /*
 POST /api/employees:
 - Returns a created employee. 
 - The payload is the employee to create.
 */
+app.post('/api/employees', async (req,res) => {
+    const { name, department_id } = req.body;
+    const result = await client.query('INSERT INTO employees (name, department_id) VALUES ($1, $2) RETURNING *', 
+        [name, department_id]
+    );
+    res.json(result.rows[0])
+})
 
 /*
 DELETE /api/employees/:id:
 - Returns nothing.
 - The ID of the employee to delete is passed in the URL.
 */
+app.delete('/api/employees/:id', async (req,res) => {
+    const { id } = req.params;
+    const result = await client.query('DELETE FROM employees WHERE id = $1', 
+        [id])
+        res.sendStatus(204) //means: successful, no content
+});
 
 /*
 PUT /api/employees/:id:
 - Returns an updated employee.
 - The payload is the employee to update.
 */
+app.put('/api/employees/:id', async (req,res) => {
+    const { id } = req.params;
+    const { name, department_id } = req.body;
+    const result = await client.query(
+        'UPDATE employees SET name = $1, department_id = $2 WHERE id = $3 RETURNING *',
+        [name, department_id, id]
+    );
+        res.json(result.rows[0]);
+});
 
-/*
-An error handling route that you add and that returns an object with an error property
-*/
+startServer();
+
 
